@@ -216,13 +216,11 @@ std::string generateNextConfigurationProposal(std::string currentconfiguration,
 	std::string nextconfiguration = currentconfiguration;
 	// Continue if proposed configuration is invalid or has been seen/checked before.
 	while (!validateConfiguration(nextconfiguration) ||
-		   GLOB_seen_configurations[nextconfiguration])
-	{
+		GLOB_seen_configurations[nextconfiguration]) {
 
 		// Check if DSE has been completed before and return current
 		// configuration.
-		if (isDSEComplete)
-		{
+		if(isDSEComplete) {
 			return currentconfiguration;
 		}
 
@@ -237,32 +235,27 @@ std::string generateNextConfigurationProposal(std::string currentconfiguration,
 
 		// Fill in the dimensions already-scanned with the already-selected best
 		// value.
-		for (int dim = 0; dim < currentlyExploringDim; ++dim)
-		{
+		for (int dim = 0; dim < currentlyExploringDim; ++dim) {
 			ss << extractConfigPararm(bestConfig, dim) << " ";
-		} //TODO
+		}
 
 		// Handling for currently exploring dimension. This is a very dumb
 		// implementation.
-		int nextValue = extractConfigPararm(nextconfiguration,
-											currentlyExploringDim) +
-						1;
+		nextValue += 1;
 
-		if (nextValue >= GLOB_dimensioncardinality[currentlyExploringDim])
-		{
+		if (nextValue >= GLOB_dimensioncardinality[currentlyExploringDim]) {
 			nextValue = GLOB_dimensioncardinality[currentlyExploringDim] - 1;
-			currentDimDone = true;
-		} //TODO
+            currentDimDone = true;
+		}
 
 		ss << nextValue << " ";
 
 		// Fill in remaining independent params with 0.
 		for (int dim = (currentlyExploringDim + 1);
-			 dim < (NUM_DIMS - NUM_DIMS_DEPENDENT); ++dim)
-		{
-			ss << "0 ";
-		} //fill with previous values instead of 0 //TODO
-
+				dim < (NUM_DIMS - NUM_DIMS_DEPENDENT); ++dim) {
+			ss << extractConfigPararm(bestConfig, dim)<<" ";
+		}
+//        cout<<currentlyExploringDim<<" "<<ss.str();
 		//
 		// Last NUM_DIMS_DEPENDENT3 configuration parameters are not independent.
 		// They depend on one or more parameters already set. Determine the
@@ -277,15 +270,22 @@ std::string generateNextConfigurationProposal(std::string currentconfiguration,
 		nextconfiguration = ss.str();
 
 		// Make sure we start exploring next dimension in next iteration.
-		if (currentDimDone)
-		{
-			currentlyExploringDim++;
+		if (currentDimDone) {
+		    dimension +=1;
+		    if (dimension == (NUM_DIMS - NUM_DIMS_DEPENDENT)){
+		        dimension = 0;
+		    }
+		    nextValue = -1;
+			currentlyExploringDim = configPref[dimension];
 			currentDimDone = false;
-		} //make sure were navigating between dimensions correctly //TODO
-
+		}
+        iter +=1;
+		if (iter == 1000)
+		    isDSEComplete = true;
+//		    cout<<ss.str();
 		// Signal that DSE is complete after this configuration.
 		if (currentlyExploringDim == (NUM_DIMS - NUM_DIMS_DEPENDENT))
-			isDSEComplete = true; //TODO
+			isDSEComplete = true;
 	}
 	return nextconfiguration;
 }
