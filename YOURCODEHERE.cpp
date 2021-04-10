@@ -15,6 +15,11 @@
 
 #include "431project.h"
 
+unsigned int getil1size(std::string configuration);
+unsigned int getdl1size(std::string configuration);
+unsigned int getl2size(std::string configuration);
+
+
 using namespace std;
 
 /*
@@ -123,13 +128,11 @@ int dl1assoc = extractConfigPararm(halfBackedConfig, 4);
 	//
 
 	return latencySettings.str();
-	return latencySettings;
 }
 
 /*
  * Returns 1 if configuration is valid, else 0
  */
-}
 
 /*
  * Returns 1 if configuration is valid, else 0
