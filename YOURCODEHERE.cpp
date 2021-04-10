@@ -388,6 +388,7 @@ std::string generateNextConfigurationProposal(std::string currentconfiguration,
             currentDimDone = false;
         }
         iter += 1;
+        cout<<iter; 
         if (iter == 1000)
             isDSEComplete = true;
         //		    cout<<ss.str();
