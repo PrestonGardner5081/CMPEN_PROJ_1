@@ -8,7 +8,7 @@ of SimpleScalar, LLC (info@simplescalar.com).
 
 sim: command line: /home/software/simplescalar/x86_64/bin/sim-outorder -fastfwd 10000000 -max:inst 1000000 -fetch:ifqsize 1 -fetch:speed 1 -fetch:mplat 3 -decode:width 1 -issue:width 1 -issue:inorder true -issue:wrongpath false -ruu:size 32 -lsq:size 16 -res:ialu 1 -res:imult 1 -res:memport 1 -res:fpalu 1 -res:fpmult 1 -cache:dl1 dl1:32:8:1:l -cache:il1 il1:32:8:1:l -cache:il2 dl2 -cache:dl2 ul2:256:16:1:l -cache:dl1lat 1 -cache:il1lat 1 -cache:dl2lat 5 -mem:lat 51 7 -mem:width 8 -tlb:lat 30 -bpred nottaken -bpred:ras 1 -bpred:btb 128 16 -redir:sim rawProjectOutputData/4...................simout /home/software/simplesim/ss-benchmark/equake/equake_base.pisa_little 
 
-sim: simulation started @ Thu Apr  8 15:09:41 2021, options follow:
+sim: simulation started @ Sat Apr 10 15:54:52 2021, options follow:
 
 sim-outorder: This simulator implements a very detailed out-of-order issue
 superscalar processor with a two-level memory system and speculative
@@ -138,8 +138,8 @@ sim_num_refs                 373466 # total number of loads and stores committed
 sim_num_loads                249080 # total number of loads committed
 sim_num_stores          124386.0000 # total number of stores committed
 sim_num_branches             195547 # total number of branches committed
-sim_elapsed_time                  1 # total simulation time in seconds
-sim_inst_rate          1000000.0000 # simulation speed (in insts/sec)
+sim_elapsed_time                  2 # total simulation time in seconds
+sim_inst_rate           500000.0000 # simulation speed (in insts/sec)
 sim_total_insn              1000000 # total number of instructions executed
 sim_total_refs               373466 # total number of loads and stores executed
 sim_total_loads              249080 # total number of loads executed
@@ -248,9 +248,9 @@ ld_stack_size                 16384 # program initial stack size
 ld_prog_entry            0x00400140 # program entry point (initial PC)
 ld_environ_base          0x7fff8000 # program environment base address address
 ld_target_big_endian              0 # target executable endian-ness, non-zero if big endian
-mem.page_count                  125 # total number of pages allocated
-mem.page_mem                   500k # total size of memory pages allocated
-mem.ptab_misses                 141 # total first level page table misses
-mem.ptab_accesses          79360590 # total page table accesses
+mem.page_count                  124 # total number of pages allocated
+mem.page_mem                   496k # total size of memory pages allocated
+mem.ptab_misses                 140 # total first level page table misses
+mem.ptab_accesses          79359474 # total page table accesses
 mem.ptab_miss_rate           0.0000 # first level page table miss rate
 
