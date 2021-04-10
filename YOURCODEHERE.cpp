@@ -21,6 +21,7 @@ using namespace std;
  * Enter your PSU IDs here to select the appropriate scanning order.
  */
 #define PSU_ID_SUM (961890335 + 978478804)
+//1940369139%24=3 so we choose order 3 ie BP core FPU cache 
 
 /*
  * Some global variables to track heuristic progress.
@@ -31,7 +32,7 @@ using namespace std;
 unsigned int currentlyExploringDim = 0;
 bool currentDimDone = false;
 bool isDSEComplete = false;
-int myOrder = {12,13,14,11,2,3,4,5,6,7,8,9,10,15,16,17,0,1}
+int myOrder [] = {12,13,14,11,2,3,4,5,6,7,8,9,10,0,1};
 
 /*
  * Given a half-baked configuration containing cache properties, generate
