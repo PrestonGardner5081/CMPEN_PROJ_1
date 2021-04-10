@@ -15,6 +15,11 @@
 
 #include "431project.h"
 
+unsigned int getil1size(std::string configuration);
+unsigned int getdl1size(std::string configuration);
+unsigned int getl2size(std::string configuration);
+
+
 using namespace std;
 
 /*
