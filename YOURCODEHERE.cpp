@@ -21,6 +21,7 @@ using namespace std;
  * Enter your PSU IDs here to select the appropriate scanning order.
  */
 #define PSU_ID_SUM (961890335 + 978478804)
+//1940369139%24=3 so we choose order 3 ie BP core FPU cache 
 
 /*
  * Some global variables to track heuristic progress.
@@ -31,8 +32,7 @@ using namespace std;
 unsigned int currentlyExploringDim = 0;
 bool currentDimDone = false;
 bool isDSEComplete = false;
-int myOrder[] = {12, 13, 14, 11, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1};
-//int myOrder = {12,13,14,11,2,3,4,5,6,7,8,9,10,15,16,17,0,1}
+int myOrder [] = {12,13,14,11,2,3,4,5,6,7,8,9,10,0,1};
 
 /*
  * Given a half-baked configuration containing cache properties, generate
@@ -43,21 +43,92 @@ int myOrder[] = {12, 13, 14, 11, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1};
  */
 std::string generateCacheLatencyParams(string halfBackedConfig)
 {
+int dl1assoc = extractConfigPararm(halfBackedConfig, 4);
+    int il1assoc = extractConfigPararm(halfBackedConfig, 6);
+    int ul2assoc = extractConfigPararm(halfBackedConfig, 9);
+    unsigned int dl1size = getdl1size(halfBackedConfig);
+    unsigned int il1size = getil1size(halfBackedConfig);
+    unsigned int ul2size = getl2size(halfBackedConfig);
 
-	string latencySettings;
+    int il1latency;
+    int dl1latency;
+    int ul2latency;
+    int dl1overhead;
+    int il1overhead;
+    int ul2overhead;
+
+    switch (dl1size){
+        case 2048:  dl1latency =  1;break;
+        case 4096:  dl1latency =  2;break;
+        case 8192:  dl1latency =  3;break;
+        case 16384: dl1latency =  4;break;
+        case 32768: dl1latency =  5;break;
+        case 65536: dl1latency =  6;break;
+        default:    dl1latency =  0;break;
+    }
+    switch (il1size){
+        case 2048:  il1latency = 1;break;
+        case 4096:  il1latency = 2;break;
+        case 8192:  il1latency = 3;break;
+        case 16384: il1latency = 4;break;
+        case 32768: il1latency = 5;break;
+        case 65536: il1latency = 6;break;
+        default:    il1latency = 0;break;
+    }
+    switch (ul2size){
+        case 32768:  ul2latency = 5;break;
+        case 65536:  ul2latency = 6;break;
+        case 131072: ul2latency = 7;break;
+        case 262144: ul2latency = 8;break;
+        case 524288: ul2latency = 9;break;
+        case 1048576:ul2latency = 10;break;
+        default:     ul2latency = 0;break;
+    }
+    switch (dl1assoc){
+        case 0: dl1overhead=0;break;
+        case 1: dl1overhead=1;break;
+        case 2: dl1overhead=2;break;
+        case 3: dl1overhead=3;break;
+    }
+    switch (il1assoc){
+        case 0: il1overhead=0;break;
+        case 1: il1overhead=1;break;
+        case 2: il1overhead=2;break;
+        case 3: il1overhead=3;break;
+    }
+    switch (ul2assoc){
+        case 0: ul2overhead=0;break;
+        case 1: ul2overhead=1;break;
+        case 2: ul2overhead=2;break;
+        case 3: ul2overhead=3;break;
+        case 4: ul2overhead=4;break;
+    }
+    int dl1 = dl1latency + dl1overhead-1;
+    int il1 = il1latency + il1overhead-1;
+    int ul2 = ul2latency + ul2overhead-5;
+
+
+    stringstream latencySettings;
+    latencySettings<<dl1<<" "<<il1<<" "<<ul2;
 
 	//
 	//YOUR CODE BEGINS HERE
 	//
 
 	// This is a dumb implementation.
-	latencySettings = "1 1 1";
+	//	latencySettings = "1 1 1";
 
 	//
 	//YOUR CODE ENDS HERE
 	//
 
+	return latencySettings.str();
 	return latencySettings;
+}
+
+/*
+ * Returns 1 if configuration is valid, else 0
+ */
 }
 
 /*
@@ -66,8 +137,53 @@ std::string generateCacheLatencyParams(string halfBackedConfig)
 int validateConfiguration(std::string configuration)
 {
 
-	// FIXME - YOUR CODE HERE
+	int l1blockSize;
+    int width;
+    int ul2blockSize;
+    int fpwidthString = extractConfigPararm(configuration, 11);
+    int l1blockString = extractConfigPararm(configuration, 2);
+    int ul2blockString = extractConfigPararm(configuration, 8);
+    switch (fpwidthString) {
+        case 0: width=1;break;
+        case 1: width=2;break;
+        case 2: width=4;break;
+        case 3: width=8;break;
+    }
+    switch (l1blockString){
+        case 0: l1blockSize=8;break;
+        case 1: l1blockSize=16;break;
+        case 2: l1blockSize=32;break;
+        case 3: l1blockSize=64;break;
+    }
+    switch (ul2blockString){
+        case 0: ul2blockSize=16;break;
+        case 1: ul2blockSize=32;break;
+        case 2: ul2blockSize=64;break;
+        case 3: ul2blockSize=128;break;
+    }
 
+    unsigned int dl1size = getdl1size(configuration);
+    unsigned int il1size = getil1size(configuration);
+    unsigned int ul2size = getl2size(configuration);
+//    string latencies = generateCacheLatencyParams(configuration);
+
+
+
+    if(l1blockSize >= width*8)
+        return 0;
+    if(2*l1blockSize>ul2blockSize)
+        return 0;
+    if((il1size<2048)||(dl1size<2048))
+        return 0;
+    if((il1size>65536)||(dl1size>65536))
+        return 0;
+    if((ul2size<32768)||(ul2size>1048576))
+        return 0;
+    if(!isNumDimConfiguration(configuration))
+        return 0;
+	// The below is a necessary, but insufficient condition for validating a
+	// configuration.
+	return 1;
 	// The below is a necessary, but insufficient condition for validating a
 	// configuration.
 	return isNumDimConfiguration(configuration);
