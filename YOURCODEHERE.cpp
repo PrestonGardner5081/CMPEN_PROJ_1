@@ -29,11 +29,10 @@ using namespace std;
  * Feel free to create more global variables to track progress of your
  * heuristic.
  */
-unsigned int currentlyExploringDim = 0;
 bool currentDimDone = false;
 bool isDSEComplete = false;
 int myOrder[] = {12, 13, 14, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1};
-int currentlyExploringDim = myOrder[dimension];
+int currentlyExploringDim = myOrder[0];
 int nextValue = 0;
 int iter = 0;
 int dimension = 0;
@@ -205,11 +204,7 @@ std::string generateCacheLatencyParams(string halfBackedConfig)
 /*
  * Returns 1 if configuration is valid, else 0
  */
-}
 
-/*
- * Returns 1 if configuration is valid, else 0
- */
 int validateConfiguration(std::string configuration)
 {
 
