@@ -37,10 +37,13 @@ using namespace std;
 bool currentDimDone = false;
 bool isDSEComplete = false;
 int myOrder[] = {12, 13, 14, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15,16,17, 0, 1};
-int currentlyExploringDim = myOrder[0];
-int nextValue = 0;
-int iter = 0;
-int dimension = 0;
+vector<int> explored_values;
+vector<int> best_val;
+vector<int> explore;
+int counter = 0;
+int explore_flag = 0;
+int global_val = 0;
+int currentlyExploringDim =0;
 
 /*
  * Given a half-baked configuration containing cache properties, generate
@@ -314,87 +317,100 @@ std::string generateNextConfigurationProposal(std::string currentconfiguration,
     // 4. NUM_DIMS_DEPENDENT
     // 5. GLOB_seen_configurations
 
-    std::string nextconfiguration = currentconfiguration;
-    // Continue if proposed configuration is invalid or has been seen/checked before.
-    while (!validateConfiguration(nextconfiguration) ||
-           GLOB_seen_configurations[nextconfiguration])
-    {
+    	std::string nextconfiguration = currentconfiguration;
+	// Continue if proposed configuration is invalid or has been seen/checked before.
+	while (!validateConfiguration(nextconfiguration) ||
+		GLOB_seen_configurations[nextconfiguration]) {
+		
+		//currentlyExploringDim = dim_order[count_order];
+		counter++;
+		// Check if DSE has been completed before and return current
+		// configuration.
+		if(isDSEComplete) {
+			return currentconfiguration;
+		}
 
-        // Check if DSE has been completed before and return current
-        // configuration.
-        if (isDSEComplete)
-        {
-            return currentconfiguration;
-        }
+		std::stringstream ss;
 
-        std::stringstream ss;
+		string bestConfig;
+		if (optimizeforEXEC == 1){
+			bestConfig = bestEXECconfiguration;
+		}
+			
 
-        string bestConfig;
-        if (optimizeforEXEC == 1)
-            bestConfig = bestEXECconfiguration;
+		if (optimizeforEDP == 1){
+			bestConfig = bestEDPconfiguration;
+		}
+			
 
-        if (optimizeforEDP == 1)
-            bestConfig = bestEDPconfiguration;
 
-        // Fill in the dimensions already-scanned with the already-selected best
-        // value.
-        for (int dim = 0; dim < currentlyExploringDim; ++dim)
-        {
-            ss << extractConfigPararm(bestConfig, dim) << " ";
-        }
+		// Fill in the dimensions already-scanned with the already-selected best
+		// value.
+		for (int dim = 0; dim < dim_order[currentlyExploringDim]; ++dim) {
+			ss << extractConfigPararm(bestConfig, dim) << " ";
+		}
 
-        // Handling for currently exploring dimension. This is a very dumb
-        // implementation.
-        nextValue += 1;
+		// Handling for currently exploring dimension. This is a very dumb
+		// implementation.
+		if(explore.size()>0){
+			int nextValue = global_val;
+			global_val++;
+			explore.push_back(nextValue);
+			ss << nextValue << " ";
+		}
 
-        if (nextValue >= GLOB_dimensioncardinality[currentlyExploringDim])
-        {
-            nextValue = GLOB_dimensioncardinality[currentlyExploringDim] - 1;
-            currentDimDone = true;
-        }
+		else { 
+			int nextValue = 0;
+			global_val++;
+			explore.push_back(nextValue);
+			ss << nextValue << " ";
+		}
 
-        ss << nextValue << " ";
 
-        // Fill in remaining independent params with 0.
-        for (int dim = (currentlyExploringDim + 1);
-             dim < (NUM_DIMS - NUM_DIMS_DEPENDENT); ++dim)
-        {
-            ss << extractConfigPararm(bestConfig, dim) << " ";
-        }
-        //        cout<<currentlyExploringDim<<" "<<ss.str();
-        //
-        // Last NUM_DIMS_DEPENDENT3 configuration parameters are not independent.
-        // They depend on one or more parameters already set. Determine the
-        // remaining parameters based on already decided independent ones.
-        //
-        string configSoFar = ss.str();
+		if (explore.size() >= GLOB_dimensioncardinality[dim_order[currentlyExploringDim]]) {
+			currentDimDone = true;
+			global_val = 0;
+			explore.clear();	
+		}
 
-        // Populate this object using corresponding parameters from config.
-        ss << generateCacheLatencyParams(configSoFar);
+		
+		
+		// Fill in remaining independent params with 0.
+		for (int dim = (dim_order[currentlyExploringDim] + 1);
+				dim < (NUM_DIMS - NUM_DIMS_DEPENDENT); ++dim) {
+					ss << extractConfigPararm(bestConfig, dim) << " ";
+		}
 
-        // Configuration is ready now.
-        nextconfiguration = ss.str();
 
-        // Make sure we start exploring next dimension in next iteration.
-        if (currentDimDone)
-        {
-            dimension += 1;
-            if (dimension == (NUM_DIMS - NUM_DIMS_DEPENDENT))
-            {
-                dimension = 0;
-            }
-            nextValue = -1;
-            currentlyExploringDim = myOrder[dimension];
-            currentDimDone = false;
-        }
-        iter += 1;
-        cout<<iter<<endl; 
-        if (iter == 1000)
-            isDSEComplete = true;
-        //		    cout<<ss.str();
-        // Signal that DSE is complete after this configuration.
-        if (currentlyExploringDim == (NUM_DIMS - NUM_DIMS_DEPENDENT))
-            isDSEComplete = true;
-    }
-    return nextconfiguration;
+		// Last NUM_DIMS_DEPENDENT3 configuration parameters are not independent.
+		// They depend on one or more parameters already set. Determine the
+		// remaining parameters based on already decided independent ones.
+		//
+		string configSoFar = ss.str();
+
+		// Populate this object using corresponding parameters from config.
+		ss << generateCacheLatencyParams(configSoFar);
+
+		// Configuration is ready now.
+		nextconfiguration = ss.str();
+
+		// Make sure we start exploring next dimension in next iteration.
+		if (currentDimDone) {
+			currentlyExploringDim++;
+			currentDimDone = false;
+			global_val = 0;
+		}
+
+		if(counter == 1000)
+			isDSEComplete = true;
+ 
+		// Signal that DSE is complete after this configuration.
+		if (currentlyExploringDim == (NUM_DIMS - NUM_DIMS_DEPENDENT))
+		{
+			global_val = 0;
+			currentlyExploringDim = 0;
+		}
+			
+	}
+	return nextconfiguration;
 }
