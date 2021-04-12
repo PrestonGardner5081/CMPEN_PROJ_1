@@ -346,7 +346,7 @@ std::string generateNextConfigurationProposal(std::string currentconfiguration,
 
 		// Fill in the dimensions already-scanned with the already-selected best
 		// value.
-		for (int dim = 0; dim < dim_order[currentlyExploringDim]; ++dim) {
+		for (int dim = 0; dim < myOrder[currentlyExploringDim]; ++dim) {
 			ss << extractConfigPararm(bestConfig, dim) << " ";
 		}
 
@@ -367,7 +367,7 @@ std::string generateNextConfigurationProposal(std::string currentconfiguration,
 		}
 
 
-		if (explore.size() >= GLOB_dimensioncardinality[dim_order[currentlyExploringDim]]) {
+		if (explore.size() >= GLOB_dimensioncardinality[myOrder[currentlyExploringDim]]) {
 			currentDimDone = true;
 			global_val = 0;
 			explore.clear();	
@@ -376,7 +376,7 @@ std::string generateNextConfigurationProposal(std::string currentconfiguration,
 		
 		
 		// Fill in remaining independent params with 0.
-		for (int dim = (dim_order[currentlyExploringDim] + 1);
+		for (int dim = (myOrder[currentlyExploringDim] + 1);
 				dim < (NUM_DIMS - NUM_DIMS_DEPENDENT); ++dim) {
 					ss << extractConfigPararm(bestConfig, dim) << " ";
 		}
